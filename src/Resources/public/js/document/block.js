@@ -1,5 +1,5 @@
-if (typeof pimcore !== 'undefined' && pimcore.registerNS) {
-    pimcore.registerNS("pimcore.document.editables.block");
+if (typeof opendxp !== 'undefined' && opendxp.registerNS) {
+    opendxp.registerNS("opendxp.document.editables.block");
 }
 
 window.insquare = window.insquare || {};
@@ -47,10 +47,10 @@ var insquareDeeplHasOverride = function (prefix, element) {
     if (!hasOverride && element) {
         var elementNode = Ext.get(element);
         if (elementNode) {
-            var nodes = elementNode.query('.pimcore_editable');
+            var nodes = elementNode.query('.opendxp_editable');
             for (var i = 0; i < nodes.length; i++) {
                 var node = Ext.get(nodes[i]);
-                if (node && !node.hasCls('pimcore_editable_inherited')) {
+                if (node && !node.hasCls('opendxp_editable_inherited')) {
                     hasOverride = true;
                     break;
                 }
@@ -61,7 +61,7 @@ var insquareDeeplHasOverride = function (prefix, element) {
     return hasOverride;
 };
 
-pimcore.document.editables.block = Class.create(pimcore.document.editables.block, {
+opendxp.document.editables.block = Class.create(opendxp.document.editables.block, {
     refreshControls: function ($super, element, limitReached) {
         $super(element, limitReached);
 
@@ -74,12 +74,12 @@ pimcore.document.editables.block = Class.create(pimcore.document.editables.block
         }
 
         var statusCache = insquare.deepl.documentTranslationStatus || {};
-        if (Object.prototype.hasOwnProperty.call(statusCache, pimcore_document_id)) {
-            if (statusCache[pimcore_document_id] === false) {
+        if (Object.prototype.hasOwnProperty.call(statusCache, opendxp_document_id)) {
+            if (statusCache[opendxp_document_id] === false) {
                 return;
             }
         } else if (typeof insquare.deepl.fetchDocumentTranslationStatus === 'function') {
-            insquare.deepl.fetchDocumentTranslationStatus(pimcore_document_id, function (isTranslation) {
+            insquare.deepl.fetchDocumentTranslationStatus(opendxp_document_id, function (isTranslation) {
                 if (isTranslation) {
                     this.refresh();
                 }
@@ -94,18 +94,18 @@ pimcore.document.editables.block = Class.create(pimcore.document.editables.block
             return;
         }
 
-        var controls = Ext.get(element).query('.pimcore_block_buttons[data-name="' + this.name + '"]')[0];
+        var controls = Ext.get(element).query('.opendxp_block_buttons[data-name="' + this.name + '"]')[0];
         if (!controls) {
             return;
         }
 
-        var translateDiv = Ext.get(controls).query('.pimcore_block_translate[data-name="' + this.name + '"]')[0];
+        var translateDiv = Ext.get(controls).query('.opendxp_block_translate[data-name="' + this.name + '"]')[0];
         if (!translateDiv) {
             translateDiv = document.createElement('div');
-            translateDiv.setAttribute('class', 'pimcore_block_translate');
+            translateDiv.setAttribute('class', 'opendxp_block_translate');
             translateDiv.setAttribute('data-name', this.name);
 
-            var clearDiv = Ext.get(controls).query('.pimcore_block_clear[data-name="' + this.name + '"]')[0];
+            var clearDiv = Ext.get(controls).query('.opendxp_block_clear[data-name="' + this.name + '"]')[0];
             if (clearDiv) {
                 controls.insertBefore(translateDiv, clearDiv);
             } else {
@@ -114,11 +114,11 @@ pimcore.document.editables.block = Class.create(pimcore.document.editables.block
         }
 
         var translateButton = new Ext.Button({
-            cls: "pimcore_block_button_translate",
-            iconCls: 'pimcore_material_icon_translation pimcore_material_icon',
+            cls: "opendxp_block_button_translate",
+            iconCls: 'opendxp_material_icon_translation opendxp_material_icon',
             tooltip: t('insquare_deepl_translate_block'),
             handler: function () {
-                insquare.deepl.translateBlock(pimcore_document_id, this.name, element.key);
+                insquare.deepl.translateBlock(opendxp_document_id, this.name, element.key);
             }.bind(this)
         });
 

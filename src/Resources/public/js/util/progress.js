@@ -1,5 +1,5 @@
-if (typeof pimcore !== 'undefined' && pimcore.registerNS) {
-    pimcore.registerNS("insquare.deepl");
+if (typeof opendxp !== 'undefined' && opendxp.registerNS) {
+    opendxp.registerNS("insquare.deepl");
 }
 
 window.insquare = window.insquare || {};

@@ -1,5 +1,5 @@
-if (typeof pimcore !== 'undefined' && pimcore.registerNS) {
-    pimcore.registerNS("insquare.deepl.document");
+if (typeof opendxp !== 'undefined' && opendxp.registerNS) {
+    opendxp.registerNS("insquare.deepl.document");
 }
 
 window.insquare = window.insquare || {};
@@ -37,7 +37,7 @@ insquare.deepl.fetchDocumentTranslationStatus = function (documentId, callback) 
 
     insquare.deepl.documentTranslationStatusLoading[documentId] = true;
 
-    var statusUrl = insquare.deepl.route('insquare_pimcore_deepl_document_status');
+    var statusUrl = insquare.deepl.route('insquare_opendxp_deepl_document_status');
     if (!statusUrl) {
         insquare.deepl.documentTranslationStatus[documentId] = false;
         delete insquare.deepl.documentTranslationStatusLoading[documentId];
@@ -82,7 +82,7 @@ insquare.deepl.fetchDocumentTranslationStatus = function (documentId, callback) 
 };
 
 insquare.deepl.translateDocument = function (document) {
-    var settingsUrl = insquare.deepl.route('insquare_pimcore_deepl_settings');
+    var settingsUrl = insquare.deepl.route('insquare_opendxp_deepl_settings');
     if (!settingsUrl) {
         insquare.deepl.showMessage(t('insquare_deepl_error_title'), t('insquare_deepl_error_generic'));
         return;
@@ -98,7 +98,7 @@ insquare.deepl.translateDocument = function (document) {
                 return;
             }
 
-            var tasksUrl = insquare.deepl.route('insquare_pimcore_deepl_document_tasks');
+            var tasksUrl = insquare.deepl.route('insquare_opendxp_deepl_document_tasks');
             if (!tasksUrl) {
                 insquare.deepl.showMessage(t('insquare_deepl_error_title'), t('insquare_deepl_error_generic'));
                 return;
@@ -134,7 +134,7 @@ insquare.deepl.translateDocument = function (document) {
                     insquare.deepl.runQueue(
                         data.tasks,
                         function (task, done, fail) {
-                            var translateUrl = insquare.deepl.route('insquare_pimcore_deepl_document_translate_field');
+                            var translateUrl = insquare.deepl.route('insquare_opendxp_deepl_document_translate_field');
                             if (!translateUrl) {
                                 fail({message: t('insquare_deepl_error_generic')});
                                 return;
@@ -199,7 +199,7 @@ insquare.deepl.translateDocument = function (document) {
 insquare.deepl.translateBlock = function (documentId, blockName, blockKey) {
     var prefix = blockName + ':' + blockKey + '.';
 
-    var settingsUrl = insquare.deepl.route('insquare_pimcore_deepl_settings');
+    var settingsUrl = insquare.deepl.route('insquare_opendxp_deepl_settings');
     if (!settingsUrl) {
         insquare.deepl.showMessage(t('insquare_deepl_error_title'), t('insquare_deepl_error_generic'));
         return;
@@ -215,7 +215,7 @@ insquare.deepl.translateBlock = function (documentId, blockName, blockKey) {
                 return;
             }
 
-            var tasksUrl = insquare.deepl.route('insquare_pimcore_deepl_document_tasks');
+            var tasksUrl = insquare.deepl.route('insquare_opendxp_deepl_document_tasks');
             if (!tasksUrl) {
                 insquare.deepl.showMessage(t('insquare_deepl_error_title'), t('insquare_deepl_error_generic'));
                 return;
@@ -257,7 +257,7 @@ insquare.deepl.translateBlock = function (documentId, blockName, blockKey) {
                     insquare.deepl.runQueue(
                         data.tasks,
                         function (task, done, fail) {
-                            var translateUrl = insquare.deepl.route('insquare_pimcore_deepl_document_translate_field');
+                            var translateUrl = insquare.deepl.route('insquare_opendxp_deepl_document_translate_field');
                             if (!translateUrl) {
                                 fail({message: t('insquare_deepl_error_generic')});
                                 return;

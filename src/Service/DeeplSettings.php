@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace InSquare\PimcoreDeeplBundle\Service;
+namespace InSquare\OpendxpDeeplBundle\Service;
 
-use Pimcore\Model\WebsiteSetting;
+use OpenDxp\Model\WebsiteSetting;
 
 final class DeeplSettings
 {

@@ -1,13 +1,13 @@
-pimcore.registerNS("pimcore.plugin.insquareDeepl");
+opendxp.registerNS("opendxp.plugin.insquareDeepl");
 
-pimcore.plugin.insquareDeepl = Class.create({
+opendxp.plugin.insquareDeepl = Class.create({
     getClassName: function () {
-        return "pimcore.plugin.insquareDeepl";
+        return "opendxp.plugin.insquareDeepl";
     },
 
     initialize: function () {
-        document.addEventListener(pimcore.events.postOpenObject, this.postOpenObject.bind(this));
-        document.addEventListener(pimcore.events.postOpenDocument, this.postOpenDocument.bind(this));
+        document.addEventListener(opendxp.events.postOpenObject, this.postOpenObject.bind(this));
+        document.addEventListener(opendxp.events.postOpenDocument, this.postOpenDocument.bind(this));
     },
 
     postOpenObject: function (event) {
@@ -22,7 +22,7 @@ pimcore.plugin.insquareDeepl = Class.create({
         }
 
         if (this.hasLocalizedFields(object)) {
-            object.tabbar.add(new pimcore.element.insquareDeeplObjectTranslate(object).getLayout());
+            object.tabbar.add(new opendxp.element.insquareDeeplObjectTranslate(object).getLayout());
             object.insquareDeeplAdded = true;
         }
     },
@@ -52,7 +52,7 @@ pimcore.plugin.insquareDeepl = Class.create({
                 insquare.deepl.translateDocument(document);
             };
 
-            var iconCls = 'pimcore_material_icon_translation pimcore_material_icon';
+            var iconCls = 'opendxp_material_icon_translation opendxp_material_icon';
 
             if (document.toolbarSubmenu && document.toolbarSubmenu.menu) {
                 document.toolbarSubmenu.menu.add({
@@ -105,4 +105,4 @@ pimcore.plugin.insquareDeepl = Class.create({
     }
 });
 
-new pimcore.plugin.insquareDeepl();
+new opendxp.plugin.insquareDeepl();

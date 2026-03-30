@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace InSquare\PimcoreDeeplBundle\Controller\Admin;
+namespace InSquare\OpendxpDeeplBundle\Controller\Admin;
 
-use InSquare\PimcoreDeeplBundle\Exception\DeeplApiException;
-use InSquare\PimcoreDeeplBundle\Exception\DeeplConfigurationException;
-use InSquare\PimcoreDeeplBundle\Service\DeeplClient;
-use InSquare\PimcoreDeeplBundle\Service\TextValueHelper;
-use InSquare\PimcoreDeeplBundle\Service\TranslationConfig;
-use Pimcore\Bundle\AdminBundle\Controller\AdminAbstractController;
-use Pimcore\Db;
-use Pimcore\Model\Document;
-use Pimcore\Model\Document\PageSnippet;
-use Pimcore\Model\Document\Service as DocumentService;
+use InSquare\OpendxpDeeplBundle\Exception\DeeplApiException;
+use InSquare\OpendxpDeeplBundle\Exception\DeeplConfigurationException;
+use InSquare\OpendxpDeeplBundle\Service\DeeplClient;
+use InSquare\OpendxpDeeplBundle\Service\TextValueHelper;
+use InSquare\OpendxpDeeplBundle\Service\TranslationConfig;
+use OpenDxp\Bundle\AdminBundle\Controller\AdminAbstractController;
+use OpenDxp\Db;
+use OpenDxp\Model\Document;
+use OpenDxp\Model\Document\PageSnippet;
+use OpenDxp\Model\Document\Service as DocumentService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 final class DocumentTranslationController extends AdminAbstractController
 {
-    #[Route('/document/status', name: 'insquare_pimcore_deepl_document_status', methods: ['GET'])]
+    #[Route('/document/status', name: 'insquare_opendxp_deepl_document_status', methods: ['GET'])]
     public function statusAction(Request $request): JsonResponse
     {
         $this->checkPermission('documents');
@@ -42,7 +42,7 @@ final class DocumentTranslationController extends AdminAbstractController
         ]);
     }
 
-    #[Route('/document/tasks', name: 'insquare_pimcore_deepl_document_tasks', methods: ['GET'])]
+    #[Route('/document/tasks', name: 'insquare_opendxp_deepl_document_tasks', methods: ['GET'])]
     public function tasksAction(Request $request, TextValueHelper $textHelper, TranslationConfig $translationConfig): JsonResponse
     {
         $this->checkPermission('documents');
@@ -177,7 +177,7 @@ final class DocumentTranslationController extends AdminAbstractController
         ]);
     }
 
-    #[Route('/document/translate-field', name: 'insquare_pimcore_deepl_document_translate_field', methods: ['POST'])]
+    #[Route('/document/translate-field', name: 'insquare_opendxp_deepl_document_translate_field', methods: ['POST'])]
     public function translateFieldAction(
         Request $request,
         DeeplClient $deeplClient,

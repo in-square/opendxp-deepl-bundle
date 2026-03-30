@@ -2,35 +2,35 @@
 
 declare(strict_types=1);
 
-namespace InSquare\PimcoreDeeplBundle\Controller\Admin;
+namespace InSquare\OpendxpDeeplBundle\Controller\Admin;
 
-use InSquare\PimcoreDeeplBundle\Exception\DeeplApiException;
-use InSquare\PimcoreDeeplBundle\Exception\DeeplConfigurationException;
-use InSquare\PimcoreDeeplBundle\Service\DeeplClient;
-use InSquare\PimcoreDeeplBundle\Service\TextValueHelper;
-use InSquare\PimcoreDeeplBundle\Service\TranslationConfig;
-use Pimcore\Bundle\AdminBundle\Controller\AdminAbstractController;
-use Pimcore\Model\DataObject;
-use Pimcore\Model\DataObject\Classificationstore\DefinitionCache;
-use Pimcore\Model\DataObject\Classificationstore\Service as ClassificationstoreService;
-use Pimcore\Model\DataObject\ClassDefinition\Data\Block;
-use Pimcore\Model\DataObject\ClassDefinition\Data\Input;
-use Pimcore\Model\DataObject\ClassDefinition\Data\Localizedfields;
-use Pimcore\Model\DataObject\ClassDefinition\Data\Textarea;
-use Pimcore\Model\DataObject\ClassDefinition\Data\Wysiwyg;
-use Pimcore\Model\DataObject\Classificationstore;
-use Pimcore\Model\DataObject\Concrete;
-use Pimcore\Model\DataObject\Data\BlockElement;
-use Pimcore\Model\DataObject\Fieldcollection;
-use Pimcore\Model\DataObject\Localizedfield;
-use Pimcore\Model\DataObject\Objectbrick;
+use InSquare\OpendxpDeeplBundle\Exception\DeeplApiException;
+use InSquare\OpendxpDeeplBundle\Exception\DeeplConfigurationException;
+use InSquare\OpendxpDeeplBundle\Service\DeeplClient;
+use InSquare\OpendxpDeeplBundle\Service\TextValueHelper;
+use InSquare\OpendxpDeeplBundle\Service\TranslationConfig;
+use OpenDxp\Bundle\AdminBundle\Controller\AdminAbstractController;
+use OpenDxp\Model\DataObject;
+use OpenDxp\Model\DataObject\Classificationstore\DefinitionCache;
+use OpenDxp\Model\DataObject\Classificationstore\Service as ClassificationstoreService;
+use OpenDxp\Model\DataObject\ClassDefinition\Data\Block;
+use OpenDxp\Model\DataObject\ClassDefinition\Data\Input;
+use OpenDxp\Model\DataObject\ClassDefinition\Data\Localizedfields;
+use OpenDxp\Model\DataObject\ClassDefinition\Data\Textarea;
+use OpenDxp\Model\DataObject\ClassDefinition\Data\Wysiwyg;
+use OpenDxp\Model\DataObject\Classificationstore;
+use OpenDxp\Model\DataObject\Concrete;
+use OpenDxp\Model\DataObject\Data\BlockElement;
+use OpenDxp\Model\DataObject\Fieldcollection;
+use OpenDxp\Model\DataObject\Localizedfield;
+use OpenDxp\Model\DataObject\Objectbrick;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 final class ObjectTranslationController extends AdminAbstractController
 {
-    #[Route('/object/translate-field', name: 'insquare_pimcore_deepl_object_translate_field', methods: ['POST'])]
+    #[Route('/object/translate-field', name: 'insquare_opendxp_deepl_object_translate_field', methods: ['POST'])]
     public function translateFieldAction(
         Request $request,
         DeeplClient $deeplClient,
@@ -305,7 +305,7 @@ final class ObjectTranslationController extends AdminAbstractController
         return ['success' => true, 'skipped' => false];
     }
 
-    private function getLocalizedFieldDefinition(Concrete $object, string $fieldName): ?\Pimcore\Model\DataObject\ClassDefinition\Data
+    private function getLocalizedFieldDefinition(Concrete $object, string $fieldName): ?\OpenDxp\Model\DataObject\ClassDefinition\Data
     {
         $localized = $object->getClass()?->getFieldDefinition('localizedfields');
         if (!$localized instanceof Localizedfields) {
@@ -315,7 +315,7 @@ final class ObjectTranslationController extends AdminAbstractController
         return $localized->getFieldDefinition($fieldName, ['object' => $object]);
     }
 
-    private function isAllowedDefinition(?\Pimcore\Model\DataObject\ClassDefinition\Data $definition): bool
+    private function isAllowedDefinition(?\OpenDxp\Model\DataObject\ClassDefinition\Data $definition): bool
     {
         if (!$definition) {
             return false;

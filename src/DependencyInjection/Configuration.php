@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace InSquare\PimcoreDeeplBundle\DependencyInjection;
+namespace InSquare\OpendxpDeeplBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -11,7 +11,7 @@ final class Configuration implements ConfigurationInterface
 {
     public function getConfigTreeBuilder(): TreeBuilder
     {
-        $treeBuilder = new TreeBuilder('in_square_pimcore_deepl');
+        $treeBuilder = new TreeBuilder('in_square_opendxp_deepl');
         $rootNode = $treeBuilder->getRootNode();
         $rootNode
             ->addDefaultsIfNotSet()

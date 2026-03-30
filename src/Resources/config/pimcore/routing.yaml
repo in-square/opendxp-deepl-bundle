@@ -1,6 +1,6 @@
-insquare_pimcore_deepl:
+insquare_opendxp_deepl:
     resource: "../../../Controller/Admin/"
-    type: annotation
+    type: attribute
     prefix: /admin/bundle/insquare-deepl
     options:
         expose: true

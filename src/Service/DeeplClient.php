@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace InSquare\PimcoreDeeplBundle\Service;
+namespace InSquare\OpendxpDeeplBundle\Service;
 
 use GuzzleHttp\ClientInterface;
-use InSquare\PimcoreDeeplBundle\Exception\DeeplApiException;
-use InSquare\PimcoreDeeplBundle\Exception\DeeplConfigurationException;
+use InSquare\OpendxpDeeplBundle\Exception\DeeplApiException;
+use InSquare\OpendxpDeeplBundle\Exception\DeeplConfigurationException;
 
 final class DeeplClient
 {

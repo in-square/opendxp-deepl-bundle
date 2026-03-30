@@ -1,11 +1,11 @@
-if (typeof pimcore !== 'undefined' && pimcore.registerNS) {
-    pimcore.registerNS("pimcore.element.insquareDeeplObjectTranslate");
+if (typeof opendxp !== 'undefined' && opendxp.registerNS) {
+    opendxp.registerNS("opendxp.element.insquareDeeplObjectTranslate");
 }
 
 window.insquare = window.insquare || {};
 window.insquare.deepl = window.insquare.deepl || {};
 
-pimcore.element.insquareDeeplObjectTranslate = Class.create({
+opendxp.element.insquareDeeplObjectTranslate = Class.create({
     initialize: function (element) {
         this.element = element;
     },
@@ -70,7 +70,7 @@ pimcore.element.insquareDeeplObjectTranslate = Class.create({
             id: 'insquareDeeplTranslateTab' + this.element.id,
             items: [panel],
             layout: "border",
-            iconCls: 'pimcore_material_icon_translation pimcore_material_icon'
+            iconCls: 'opendxp_material_icon_translation opendxp_material_icon'
         });
 
         return this.layout;
@@ -90,7 +90,7 @@ pimcore.element.insquareDeeplObjectTranslate = Class.create({
             return;
         }
 
-        var settingsUrl = insquare.deepl.route('insquare_pimcore_deepl_settings');
+        var settingsUrl = insquare.deepl.route('insquare_opendxp_deepl_settings');
         if (!settingsUrl) {
             insquare.deepl.showMessage(t('insquare_deepl_error_title'), t('insquare_deepl_error_generic'));
             return;
@@ -106,7 +106,7 @@ pimcore.element.insquareDeeplObjectTranslate = Class.create({
                     return;
                 }
 
-                var translateUrl = insquare.deepl.route('insquare_pimcore_deepl_object_translate_field');
+                var translateUrl = insquare.deepl.route('insquare_opendxp_deepl_object_translate_field');
                 if (!translateUrl) {
                     insquare.deepl.showMessage(t('insquare_deepl_error_title'), t('insquare_deepl_error_generic'));
                     return;
@@ -257,12 +257,12 @@ pimcore.element.insquareDeeplObjectTranslate = Class.create({
     },
 
     getLanguages: function () {
-        var locales = pimcore.settings.websiteLanguages || [];
+        var locales = opendxp.settings.websiteLanguages || [];
         var languages = [];
 
         for (var i = 0; i < locales.length; i++) {
             var code = locales[i];
-            var label = pimcore.available_languages[code] + " [" + code + "]";
+            var label = opendxp.available_languages[code] + " [" + code + "]";
             languages.push([code, label]);
         }
 

@@ -1,23 +1,23 @@
-# InSquare Pimcore DeepL Bundle
+# InSquare OpenDXP DeepL Bundle
 
-Bundle for integrating Pimcore with DeepL. It enables translating:
+Bundle for integrating OpenDXP with DeepL. It enables translating:
 - `localizedfields` in objects
 - translated documents (full document)
 - individual areablock blocks (only when the block is overridden)
 
 ## Requirements
-- PHP 8.2
-- Symfony 6.4
-- Pimcore 11
+- PHP 8.3
+- Symfony 7.4
+- OpenDXP 1.3
 
 ## Installation (Composer)
 1. Install the package:
 ```bash
-composer require in-square/pimcore-deepl-bundle
+composer require in-square/opendxp-deepl-bundle
 ```
 2. If the bundle was not added automatically, register it in `config/bundles.php`:
 ```php
-InSquare\PimcoreDeeplBundle\InSquarePimcoreDeeplBundle::class => ['all' => true],
+InSquare\OpendxpDeeplBundle\InSquareOpendxpDeeplBundle::class => ['all' => true],
 ```
 3. Run `bin/console assets:install`.
 
@@ -26,9 +26,9 @@ Set the following Website Settings:
 - `deepl_api_key` – DeepL API key
 - `deepl_account_type` – `FREE` or `PRO`
 
-Optional YAML configuration (e.g. `config/packages/in_square_pimcore_deepl.yaml`):
+Optional YAML configuration (e.g. `config/packages/in_square_opendxp_deepl.yaml`):
 ```yaml
-in_square_pimcore_deepl:
+in_square_opendxp_deepl:
   overwrite:
     documents: false
     objects: false

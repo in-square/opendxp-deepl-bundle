@@ -4,19 +4,19 @@ services:
         autoconfigure: true
         public: false
 
-    InSquare\PimcoreDeeplBundle\Service\TranslationConfig:
+    InSquare\OpendxpDeeplBundle\Service\TranslationConfig:
         arguments:
-            $overwriteDocuments: '%in_square_pimcore_deepl.overwrite.documents%'
-            $overwriteObjects: '%in_square_pimcore_deepl.overwrite.objects%'
+            $overwriteDocuments: '%in_square_opendxp_deepl.overwrite.documents%'
+            $overwriteObjects: '%in_square_opendxp_deepl.overwrite.objects%'
 
-    InSquare\PimcoreDeeplBundle\Controller\:
+    InSquare\OpendxpDeeplBundle\Controller\:
         resource: '../../Controller/'
         tags: ['controller.service_arguments']
         public: true
 
-    InSquare\PimcoreDeeplBundle\:
+    InSquare\OpendxpDeeplBundle\:
         resource: '../../'
         exclude:
             - '../../DependencyInjection/'
             - '../../Resources/'
-            - '../../InSquarePimcoreDeeplBundle.php'
+            - '../../InSquareOpendxpDeeplBundle.php'
