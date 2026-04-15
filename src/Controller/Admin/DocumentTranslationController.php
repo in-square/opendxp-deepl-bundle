@@ -8,12 +8,14 @@ use InSquare\OpendxpDeeplBundle\Exception\DeeplApiException;
 use InSquare\OpendxpDeeplBundle\Exception\DeeplConfigurationException;
 use InSquare\OpendxpDeeplBundle\Service\DeeplClient;
 use InSquare\OpendxpDeeplBundle\Service\TextValueHelper;
+use InSquare\OpendxpDeeplBundle\Service\TranslationErrorHandler;
 use InSquare\OpendxpDeeplBundle\Service\TranslationConfig;
 use OpenDxp\Bundle\AdminBundle\Controller\AdminAbstractController;
 use OpenDxp\Db;
 use OpenDxp\Model\Document;
 use OpenDxp\Model\Document\PageSnippet;
 use OpenDxp\Model\Document\Service as DocumentService;
+use OpenDxp\Model\Element\ValidationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -182,7 +184,8 @@ final class DocumentTranslationController extends AdminAbstractController
         Request $request,
         DeeplClient $deeplClient,
         TextValueHelper $textHelper,
-        TranslationConfig $translationConfig
+        TranslationConfig $translationConfig,
+        TranslationErrorHandler $errorHandler
     ): JsonResponse {
         $this->checkPermission('documents');
 
@@ -249,10 +252,29 @@ final class DocumentTranslationController extends AdminAbstractController
             }
         }
 
+        $sourceText = (string) ($sourceRow['data'] ?? '');
         $isHtml = ($sourceRow['type'] ?? '') === 'wysiwyg';
+        $user = $this->getUser();
+        $user = is_object($user) ? $user : null;
+        $errorContext = [
+            'id' => $documentId,
+            'key' => $name,
+            'source' => $sourceLang,
+            'target' => $targetLang,
+            'objectId' => null,
+            'documentId' => $document->getId(),
+            'sourceDocumentId' => $sourceDocumentId,
+            'className' => $document::class,
+            'path' => $document->getFullPath(),
+        ];
 
         try {
-            $translated = $deeplClient->translate((string) $sourceRow['data'], $sourceLang ?: null, $targetLang, $isHtml);
+            $translated = $deeplClient->translate($sourceText, $sourceLang ?: null, $targetLang, $isHtml);
+
+            $document->getEditables();
+            $document->setEditables($document->getEditables());
+            $document->setRawEditable($name, (string) $sourceRow['type'], $translated);
+            $document->save();
         } catch (DeeplConfigurationException $exception) {
             return $this->adminJson(['success' => false, 'message' => $exception->getMessage(), 'code' => 'missing_key'], 400);
         } catch (DeeplApiException $exception) {
@@ -262,14 +284,15 @@ final class DocumentTranslationController extends AdminAbstractController
                 'code' => 'deepl_error',
                 'status' => $exception->getStatusCode(),
             ], 502);
-        } catch (\Throwable $exception) {
-            return $this->adminJson(['success' => false, 'message' => 'Translation failed.'], 500);
-        }
+        } catch (ValidationException $exception) {
+            $error = $errorHandler->handleValidation('document', $request, $user, $errorContext, $sourceText, $exception);
 
-        $document->getEditables();
-        $document->setEditables($document->getEditables());
-        $document->setRawEditable($name, $sourceRow['type'], $translated);
-        $document->save();
+            return $this->adminJson($error->getPayload(), $error->getStatusCode());
+        } catch (\Throwable $exception) {
+            $error = $errorHandler->handleUnexpected('document', $request, $user, $errorContext, $sourceText, $exception);
+
+            return $this->adminJson($error->getPayload(), $error->getStatusCode());
+        }
 
         return $this->adminJson(['success' => true, 'skipped' => false]);
     }

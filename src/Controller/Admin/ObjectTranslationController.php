@@ -8,6 +8,7 @@ use InSquare\OpendxpDeeplBundle\Exception\DeeplApiException;
 use InSquare\OpendxpDeeplBundle\Exception\DeeplConfigurationException;
 use InSquare\OpendxpDeeplBundle\Service\DeeplClient;
 use InSquare\OpendxpDeeplBundle\Service\TextValueHelper;
+use InSquare\OpendxpDeeplBundle\Service\TranslationErrorHandler;
 use InSquare\OpendxpDeeplBundle\Service\TranslationConfig;
 use OpenDxp\Bundle\AdminBundle\Controller\AdminAbstractController;
 use OpenDxp\Model\DataObject;
@@ -24,6 +25,7 @@ use OpenDxp\Model\DataObject\Data\BlockElement;
 use OpenDxp\Model\DataObject\Fieldcollection;
 use OpenDxp\Model\DataObject\Localizedfield;
 use OpenDxp\Model\DataObject\Objectbrick;
+use OpenDxp\Model\Element\ValidationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -35,7 +37,8 @@ final class ObjectTranslationController extends AdminAbstractController
         Request $request,
         DeeplClient $deeplClient,
         TextValueHelper $textHelper,
-        TranslationConfig $translationConfig
+        TranslationConfig $translationConfig,
+        TranslationErrorHandler $errorHandler
     ): JsonResponse {
         $this->checkPermission('objects');
 
@@ -58,6 +61,18 @@ final class ObjectTranslationController extends AdminAbstractController
             return $this->adminJson(['success' => true, 'skipped' => true, 'reason' => 'empty_source']);
         }
 
+        $user = $this->getUser();
+        $user = is_object($user) ? $user : null;
+        $errorContext = [
+            'id' => $id,
+            'key' => $key,
+            'source' => $sourceLang,
+            'target' => $targetLang,
+            'objectId' => $object->getId(),
+            'className' => $object->getClassName(),
+            'path' => $object->getRealFullPath(),
+        ];
+
         try {
             $result = $this->translateObjectField(
                 $object,
@@ -78,8 +93,14 @@ final class ObjectTranslationController extends AdminAbstractController
                 'code' => 'deepl_error',
                 'status' => $exception->getStatusCode(),
             ], 502);
+        } catch (ValidationException $exception) {
+            $error = $errorHandler->handleValidation('object', $request, $user, $errorContext, $text, $exception);
+
+            return $this->adminJson($error->getPayload(), $error->getStatusCode());
         } catch (\Throwable $exception) {
-            return $this->adminJson(['success' => false, 'message' => 'Translation failed.'], 500);
+            $error = $errorHandler->handleUnexpected('object', $request, $user, $errorContext, $text, $exception);
+
+            return $this->adminJson($error->getPayload(), $error->getStatusCode());
         }
 
         return $this->adminJson($result);
@@ -325,4 +346,5 @@ final class ObjectTranslationController extends AdminAbstractController
             || $definition instanceof Textarea
             || $definition instanceof Wysiwyg;
     }
+
 }
