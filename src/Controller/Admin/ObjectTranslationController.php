@@ -17,11 +17,13 @@ use OpenDxp\Model\DataObject\Classificationstore\Service as ClassificationstoreS
 use OpenDxp\Model\DataObject\ClassDefinition\Data\Block;
 use OpenDxp\Model\DataObject\ClassDefinition\Data\Input;
 use OpenDxp\Model\DataObject\ClassDefinition\Data\Localizedfields;
+use OpenDxp\Model\DataObject\ClassDefinition\Data\UrlSlug as UrlSlugDefinition;
 use OpenDxp\Model\DataObject\ClassDefinition\Data\Textarea;
 use OpenDxp\Model\DataObject\ClassDefinition\Data\Wysiwyg;
 use OpenDxp\Model\DataObject\Classificationstore;
 use OpenDxp\Model\DataObject\Concrete;
 use OpenDxp\Model\DataObject\Data\BlockElement;
+use OpenDxp\Model\DataObject\Data\UrlSlug as UrlSlugData;
 use OpenDxp\Model\DataObject\Fieldcollection;
 use OpenDxp\Model\DataObject\Localizedfield;
 use OpenDxp\Model\DataObject\Objectbrick;
@@ -155,7 +157,7 @@ final class ObjectTranslationController extends AdminAbstractController
         $translated = $deeplClient->translate($text, $sourceLang ?: null, $targetLang, $definition instanceof Wysiwyg);
 
         $object->set($key, $translated, $targetLang);
-        $object->save();
+        $this->saveObjectHandlingSlugConflicts($object, $targetLang);
 
         return ['success' => true, 'skipped' => false];
     }
@@ -198,7 +200,7 @@ final class ObjectTranslationController extends AdminAbstractController
 
             $translated = $deeplClient->translate($text, $sourceLang ?: null, $targetLang, $definition instanceof Wysiwyg);
             $item->set($field, $translated, $targetLang);
-            $object->save();
+            $this->saveObjectHandlingSlugConflicts($object, $targetLang);
 
             return ['success' => true, 'skipped' => false];
         }
@@ -222,7 +224,7 @@ final class ObjectTranslationController extends AdminAbstractController
 
             $translated = $deeplClient->translate($text, $sourceLang ?: null, $targetLang, $definition instanceof Wysiwyg);
             $brick->set($field, $translated, $targetLang);
-            $object->save();
+            $this->saveObjectHandlingSlugConflicts($object, $targetLang);
 
             return ['success' => true, 'skipped' => false];
         }
@@ -275,7 +277,7 @@ final class ObjectTranslationController extends AdminAbstractController
                 $object->set($fieldName, $structuredField);
             }
 
-            $object->save();
+            $this->saveObjectHandlingSlugConflicts($object, $targetLang);
 
             return ['success' => true, 'skipped' => false];
         }
@@ -321,9 +323,107 @@ final class ObjectTranslationController extends AdminAbstractController
         $translated = $deeplClient->translate($text, $sourceLang ?: null, $targetLang, $definition instanceof Wysiwyg);
         $store->setObject($object);
         $store->setLocalizedKeyValue($groupId, $keyId, $translated, $targetLang);
-        $object->save();
+        $this->saveObjectHandlingSlugConflicts($object, $targetLang);
 
         return ['success' => true, 'skipped' => false];
+    }
+
+    private function saveObjectHandlingSlugConflicts(Concrete $object, string $targetLang): void
+    {
+        $this->ensureLocalizedSlugsAreUnique($object, $targetLang);
+        $object->save();
+    }
+
+    private function ensureLocalizedSlugsAreUnique(Concrete $object, string $targetLang): void
+    {
+        foreach ($this->getLocalizedUrlSlugFieldNames($object) as $fieldName) {
+            $slugs = $object->get($fieldName, $targetLang);
+            if (!is_array($slugs) || $slugs === []) {
+                continue;
+            }
+
+            $updated = false;
+            foreach ($slugs as $slug) {
+                if (!$slug instanceof UrlSlugData) {
+                    continue;
+                }
+
+                $value = (string) ($slug->getSlug() ?? '');
+                if ($value === '') {
+                    continue;
+                }
+
+                $siteId = (int) ($slug->getSiteId() ?? 0);
+                if (!$this->isSlugTaken($value, $siteId)) {
+                    continue;
+                }
+
+                $slug->setSlug($this->generateUniqueSlugCandidate($value, $siteId, $targetLang));
+                $updated = true;
+            }
+
+            if ($updated) {
+                $object->set($fieldName, $slugs, $targetLang);
+            }
+        }
+    }
+
+    /**
+     * @return string[]
+     */
+    private function getLocalizedUrlSlugFieldNames(Concrete $object): array
+    {
+        $localized = $object->getClass()?->getFieldDefinition('localizedfields');
+        if (!$localized instanceof Localizedfields) {
+            return [];
+        }
+
+        $fieldNames = [];
+        foreach ($localized->getChildren() as $definition) {
+            if (!$definition instanceof UrlSlugDefinition) {
+                continue;
+            }
+
+            $fieldNames[] = $definition->getName();
+        }
+
+        return $fieldNames;
+    }
+
+    private function generateUniqueSlugCandidate(string $slug, int $siteId, string $targetLang): string
+    {
+        $base = $this->normalizeSlug($slug);
+        $langSuffix = trim((string) preg_replace('/[^a-z0-9]+/i', '-', strtolower($targetLang)), '-');
+        if ($langSuffix !== '') {
+            $localizedCandidate = $base . '-' . $langSuffix;
+            if (!$this->isSlugTaken($localizedCandidate, $siteId)) {
+                return $localizedCandidate;
+            }
+
+            $base = $localizedCandidate;
+        }
+
+        $candidate = $base;
+        $counter = 1;
+        while ($this->isSlugTaken($candidate, $siteId)) {
+            $candidate = $base . '-' . $counter;
+            ++$counter;
+        }
+
+        return $candidate;
+    }
+
+    private function normalizeSlug(string $slug): string
+    {
+        $normalized = '/' . ltrim(trim($slug), '/');
+        $normalized = rtrim($normalized, '/');
+
+        return $normalized === '' ? '/slug' : $normalized;
+    }
+
+    private function isSlugTaken(string $slug, int $siteId): bool
+    {
+        return UrlSlugData::resolveSlug($slug, $siteId) instanceof UrlSlugData;
     }
 
     private function getLocalizedFieldDefinition(Concrete $object, string $fieldName): ?\OpenDxp\Model\DataObject\ClassDefinition\Data

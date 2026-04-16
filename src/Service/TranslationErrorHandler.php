@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace InSquare\OpendxpDeeplBundle\Service;
 
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use OpenDxp\Model\Element\ValidationException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,6 +46,21 @@ final class TranslationErrorHandler
         string $text,
         \Throwable $exception
     ): TranslationErrorResult {
+        if ($this->isUniqueConstraintViolation($exception)) {
+            return $this->handle(
+                $scope,
+                $request,
+                $user,
+                $context,
+                $text,
+                $exception,
+                422,
+                'Validation failed. Unique value conflict detected (for example URL slug).',
+                'failed due to unique constraint violation',
+                'unique_constraint_violation'
+            );
+        }
+
         return $this->handle(
             $scope,
             $request,
@@ -54,7 +70,8 @@ final class TranslationErrorHandler
             $exception,
             500,
             'Translation failed. Contact administrator and provide error ID.',
-            'failed'
+            'failed',
+            null
         );
     }
 
@@ -67,7 +84,8 @@ final class TranslationErrorHandler
         \Throwable $exception,
         int $statusCode,
         string $userMessage,
-        string $logSuffix
+        string $logSuffix,
+        ?string $errorCode = null
     ): TranslationErrorResult {
         $errorId = Uuid::v4()->toRfc4122();
         $logContext = $this->buildContext($request, $user, $context, $text, $errorId);
@@ -75,11 +93,17 @@ final class TranslationErrorHandler
 
         $this->logger->error(sprintf('DeepL %s translation %s.', $scope, $logSuffix), $logContext);
 
-        return new TranslationErrorResult([
+        $payload = [
             'success' => false,
             'message' => $userMessage,
             'errorId' => $errorId,
-        ], $statusCode);
+        ];
+
+        if ($errorCode !== null) {
+            $payload['code'] = $errorCode;
+        }
+
+        return new TranslationErrorResult($payload, $statusCode);
     }
 
     private function buildContext(Request $request, ?object $user, array $context, string $text, string $errorId): array
@@ -141,5 +165,33 @@ final class TranslationErrorHandler
 
         return $snippet;
     }
-}
 
+    private function isUniqueConstraintViolation(\Throwable $exception): bool
+    {
+        foreach ($this->exceptionChain($exception) as $chainException) {
+            if ($chainException instanceof UniqueConstraintViolationException) {
+                return true;
+            }
+
+            $message = strtolower($chainException->getMessage());
+            if (
+                str_contains($message, 'unique constraint violated')
+                || str_contains($message, 'duplicate entry')
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return \Generator<int, \Throwable>
+     */
+    private function exceptionChain(\Throwable $exception): \Generator
+    {
+        for ($current = $exception; $current !== null; $current = $current->getPrevious()) {
+            yield $current;
+        }
+    }
+}
